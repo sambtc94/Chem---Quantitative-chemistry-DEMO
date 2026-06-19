@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChemQuest – Quantitative Chemistry</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Particle canvas for background effects -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Achievement popup -->
+  <div id="achievement-popup" class="achievement-popup hidden">
+    <div class="achievement-popup-inner">
+      <span class="achievement-popup-icon" id="ach-pop-icon"></span>
+      <div>
+        <div class="achievement-popup-title">Achievement Unlocked!</div>
+        <div class="achievement-popup-name" id="ach-pop-name"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header id="app-header">
+    <div class="header-inner">
+      <div class="logo" id="logo-btn">⚗️ ChemQuest</div>
+      <div class="player-bar" id="player-bar">
+        <div class="level-tag">Lv <span id="hdr-level">1</span></div>
+        <div class="xp-wrap">
+          <div class="xp-track"><div class="xp-fill" id="hdr-xp-fill" style="width:0%"></div></div>
+          <span class="xp-label" id="hdr-xp-label">0 / 100 XP</span>
+        </div>
+        <div class="streak-tag" title="Answer streak">🔥 <span id="hdr-streak">0</span></div>
+        <button class="btn-icon" id="tools-btn" title="Formula Tools">🧮</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════  SCREENS  ═══════════════════ -->
+
+  <!-- SCREEN: Welcome -->
+  <section id="screen-welcome" class="screen active">
+    <div class="welcome-card">
+      <div class="welcome-logo">⚗️</div>
+      <h1 class="welcome-title">ChemQuest</h1>
+      <p class="welcome-sub">Master Quantitative Chemistry through interactive challenges</p>
+      <label class="input-label" for="player-name-input">Enter your name to begin</label>
+      <input id="player-name-input" class="text-input" type="text" placeholder="Your name…" maxlength="24" autocomplete="off">
+      <button class="btn-primary btn-lg" id="start-btn">Start Adventure →</button>
+      <p class="welcome-note">Your progress is saved locally in this browser.</p>
+    </div>
+  </section>
+
+  <!-- SCREEN: Dashboard -->
+  <section id="screen-dashboard" class="screen hidden">
+    <div class="dash-header">
+      <div>
+        <h2 class="dash-greeting" id="dash-greeting">Welcome back!</h2>
+        <p class="dash-sub">Choose a module to continue your journey</p>
+      </div>
+      <div class="rank-card">
+        <div class="rank-icon" id="rank-icon">🧪</div>
+        <div class="rank-info">
+          <div class="rank-title" id="rank-title">Novice Chemist</div>
+          <div class="rank-xp" id="rank-xp">0 XP total</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="module-grid" id="module-grid">
+      <!-- Module cards injected by JS -->
+    </div>
+
+    <h3 class="section-title">🏆 Achievements</h3>
+    <div class="achievements-grid" id="achievements-grid">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- SCREEN: Module Intro -->
+  <section id="screen-module" class="screen hidden">
+    <button class="btn-back" id="module-back-btn">← Back</button>
+    <div class="module-intro-card" id="module-intro-card">
+      <!-- Injected by JS -->
+    </div>
+  </section>
+
+  <!-- SCREEN: Quiz -->
+  <section id="screen-quiz" class="screen hidden">
+    <div class="quiz-header">
+      <button class="btn-back" id="quiz-back-btn">← Exit</button>
+      <div class="quiz-meta">
+        <span id="quiz-topic-label" class="quiz-topic-label"></span>
+        <span id="quiz-difficulty-label" class="difficulty-badge"></span>
+      </div>
+      <div class="quiz-progress-wrap">
+        <span id="quiz-q-counter" class="quiz-q-counter">Q 1 / 10</span>
+        <div class="quiz-progress-track">
+          <div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz-score-row">
+      <span>Score: <strong id="quiz-score">0</strong></span>
+      <span id="quiz-streak-display" class="streak-display hidden">🔥 <span id="quiz-streak-num">0</span> streak!</span>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-formula" id="question-formula"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="feedback-area hidden" id="feedback-area">
+        <div class="feedback-icon" id="feedback-icon"></div>
+        <div class="feedback-text" id="feedback-text"></div>
+        <div class="explanation-text" id="explanation-text"></div>
+      </div>
+      <div class="question-actions" id="question-actions">
+        <button class="btn-primary" id="submit-btn">Check Answer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: Results -->
+  <section id="screen-results" class="screen hidden">
+    <div class="results-card">
+      <div class="results-icon" id="results-icon"></div>
+      <h2 class="results-title" id="results-title"></h2>
+      <div class="results-score-big" id="results-score-big"></div>
+      <div class="results-stats" id="results-stats"></div>
+      <div class="results-xp" id="results-xp"></div>
+      <div class="new-achievements" id="new-achievements"></div>
+      <div class="results-actions">
+        <button class="btn-secondary" id="results-retry-btn">Try Again</button>
+        <button class="btn-primary" id="results-home-btn">Dashboard</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN: Tools -->
+  <section id="screen-tools" class="screen hidden">
+    <button class="btn-back" id="tools-back-btn">← Back</button>
+    <h2 class="section-title">🧮 Formula Calculators</h2>
+    <p class="tools-sub">Enter any known values — the tool will calculate the rest.</p>
+
+    <div class="tools-grid">
+
+      <!-- Mole Calculator -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-icon">⚖️</span>
+          <div>
+            <div class="tool-name">Mole Calculator</div>
+            <div class="tool-formula-label">n = m / M</div>
+          </div>
+        </div>
+        <div class="tool-fields">
+          <div class="tool-field">
+            <label>n — amount (mol)</label>
+            <input type="number" id="t-n" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>m — mass (g)</label>
+            <input type="number" id="t-m" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>M — molar mass (g mol⁻¹)</label>
+            <input type="number" id="t-M" placeholder="?" step="any">
+          </div>
+        </div>
+        <button class="btn-primary btn-sm" onclick="calcMoles()">Calculate</button>
+        <div class="tool-result" id="t-moles-result"></div>
+      </div>
+
+      <!-- Concentration Calculator -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-icon">🧪</span>
+          <div>
+            <div class="tool-name">Concentration Calculator</div>
+            <div class="tool-formula-label">c = n / V</div>
+          </div>
+        </div>
+        <div class="tool-fields">
+          <div class="tool-field">
+            <label>c — concentration (mol L⁻¹)</label>
+            <input type="number" id="t-c" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>n — amount (mol)</label>
+            <input type="number" id="t-cn" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>V — volume (L)</label>
+            <input type="number" id="t-cv" placeholder="?" step="any">
+          </div>
+        </div>
+        <button class="btn-primary btn-sm" onclick="calcConc()">Calculate</button>
+        <div class="tool-result" id="t-conc-result"></div>
+      </div>
+
+      <!-- Ideal Gas Calculator -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-icon">💨</span>
+          <div>
+            <div class="tool-name">Ideal Gas Calculator</div>
+            <div class="tool-formula-label">PV = nRT &nbsp;(R = 8.314 J mol⁻¹ K⁻¹)</div>
+          </div>
+        </div>
+        <div class="tool-fields">
+          <div class="tool-field">
+            <label>P — pressure (kPa)</label>
+            <input type="number" id="t-P" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>V — volume (L)</label>
+            <input type="number" id="t-V" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>n — amount (mol)</label>
+            <input type="number" id="t-gn" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>T — temperature (K)</label>
+            <input type="number" id="t-T" placeholder="?" step="any">
+          </div>
+        </div>
+        <button class="btn-primary btn-sm" onclick="calcGas()">Calculate</button>
+        <div class="tool-result" id="t-gas-result"></div>
+      </div>
+
+      <!-- Dilution Calculator -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-icon">💧</span>
+          <div>
+            <div class="tool-name">Dilution Calculator</div>
+            <div class="tool-formula-label">c₁V₁ = c₂V₂</div>
+          </div>
+        </div>
+        <div class="tool-fields">
+          <div class="tool-field">
+            <label>c₁ — initial concentration (mol L⁻¹)</label>
+            <input type="number" id="t-c1" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>V₁ — initial volume (L)</label>
+            <input type="number" id="t-v1" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>c₂ — final concentration (mol L⁻¹)</label>
+            <input type="number" id="t-c2" placeholder="?" step="any">
+          </div>
+          <div class="tool-field">
+            <label>V₂ — final volume (L)</label>
+            <input type="number" id="t-v2" placeholder="?" step="any">
+          </div>
+        </div>
+        <button class="btn-primary btn-sm" onclick="calcDilution()">Calculate</button>
+        <div class="tool-result" id="t-dil-result"></div>
+      </div>
+
+    </div>
+
+    <!-- Concentration unit reference -->
+    <h3 class="section-title" style="margin-top:2rem">📐 Concentration Unit Reference</h3>
+    <div class="ref-table-wrap">
+      <table class="ref-table">
+        <thead>
+          <tr><th>Unit</th><th>Full name</th><th>Formula / Definition</th><th>Typical use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>mol L⁻¹</td><td>Molar concentration</td><td>c = n/V</td><td>Lab solutions</td></tr>
+          <tr><td>g L⁻¹</td><td>Mass concentration</td><td>mass(g) / volume(L)</td><td>IV fluids, food tech</td></tr>
+          <tr><td>mg L⁻¹</td><td>Milligram per litre</td><td>mass(mg) / volume(L)</td><td>Trace nutrients, drugs</td></tr>
+          <tr><td>% w/w</td><td>Mass fraction</td><td>mass solute / mass solution × 100</td><td>Solid mixtures, alloys</td></tr>
+          <tr><td>% w/v</td><td>Mass/volume percent</td><td>mass(g) / volume(mL) × 100</td><td>Pharmaceuticals</td></tr>
+          <tr><td>% v/v</td><td>Volume percent</td><td>volume solute / volume solution × 100</td><td>Alcohol, perfumes</td></tr>
+          <tr><td>ppm</td><td>Parts per million</td><td>mg/kg or mg/L</td><td>Pesticides, contaminants</td></tr>
+          <tr><td>ppb</td><td>Parts per billion</td><td>µg/kg or µg/L</td><td>Ultra-trace analysis</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
